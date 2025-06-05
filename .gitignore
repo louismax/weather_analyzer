@@ -31,3 +31,5 @@ go.work.sum
 # .idea/
 # .vscode/
 .idea/
+dev-ed25519-private.pem
+local_test.go

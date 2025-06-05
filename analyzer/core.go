@@ -1,6 +1,9 @@
 package analyzer
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/louismax/weather_analyzer/utils"
+)
 
 // WeatherCondition 表示天气状况
 type WeatherCondition struct {
@@ -56,15 +59,15 @@ type WeatherAnalysisResult struct {
 // NewWeatherAnalyzer 创建新的天气分析器
 func NewWeatherAnalyzer(conditions []WeatherCondition) (*WeatherAnalyzer, error) {
 	if conditions == nil {
-		return nil, &WeatherError{
-			Code:    ErrInvalidInput,
+		return nil, &utils.WeatherError{
+			Code:    utils.ErrInvalidInput,
 			Message: "天气数据不能为空",
 		}
 	}
 
 	if len(conditions) == 0 {
-		return nil, &WeatherError{
-			Code:    ErrEmptyData,
+		return nil, &utils.WeatherError{
+			Code:    utils.ErrEmptyData,
 			Message: "天气数据列表为空",
 		}
 	}
@@ -72,8 +75,8 @@ func NewWeatherAnalyzer(conditions []WeatherCondition) (*WeatherAnalyzer, error)
 	// 验证每个天气条件
 	for i, condition := range conditions {
 		if err := validateWeatherCondition(condition); err != nil {
-			return nil, &WeatherError{
-				Code:    ErrInvalidInput,
+			return nil, &utils.WeatherError{
+				Code:    utils.ErrInvalidInput,
 				Message: fmt.Sprintf("第%d个天气数据无效", i+1),
 				Err:     err,
 			}
@@ -184,9 +187,9 @@ func (wa *WeatherAnalyzer) SetCustomWeights(customWeights map[string]float64) {
 	if customWeights != nil {
 		for condition, weight := range customWeights {
 			if _, exists := wa.conditionWeights[condition]; exists {
-				fmt.Printf("\033[33m警告: 覆盖默认天气状况权重 '%s' (原值: %.3f, 新值: %.3f)\033[0m\n", condition, wa.conditionWeights[condition], weight)
+				utils.PrintWarnLog(fmt.Sprintf("覆盖默认天气状况权重 '%s' (原值: %.1f, 新值: %.1f)", condition, wa.windSpeedThresholds[condition], weight))
 			} else {
-				fmt.Printf("\033[34m提示: 新增天气状况权重 '%s' (值: %.3f)\033[0m\n", condition, weight)
+				utils.PrintInfoLog(fmt.Sprintf("新增天气状况权重 '%s' (值: %.1f)", condition, weight))
 			}
 			wa.conditionWeights[condition] = weight
 		}
@@ -199,9 +202,9 @@ func (wa *WeatherAnalyzer) SetCustomPrecipitationThresholds(customPrecipitationT
 	if customPrecipitationThresholds != nil {
 		for condition, threshold := range customPrecipitationThresholds {
 			if _, exists := wa.precipitationThresholds[condition]; exists {
-				fmt.Printf("\033[33m警告: 覆盖默认降水量阈值 '%s' (原值: %.1f, 新值: %.1f)\033[0m\n", condition, wa.precipitationThresholds[condition], threshold)
+				utils.PrintWarnLog(fmt.Sprintf("覆盖默认降水量阈值 '%s' (原值: %.1f, 新值: %.1f)", condition, wa.precipitationThresholds[condition], threshold))
 			} else {
-				fmt.Printf("\033[34m提示: 新增降水量阈值 '%s' (值: %.1f)\033[0m\n", condition, threshold)
+				utils.PrintInfoLog(fmt.Sprintf("新增降水量阈值 '%s' (值: %.1f)", condition, threshold))
 			}
 			wa.precipitationThresholds[condition] = threshold
 		}
@@ -214,9 +217,9 @@ func (wa *WeatherAnalyzer) SetCustomWindSpeedThresholds(customWindSpeedThreshold
 	if customWindSpeedThresholds != nil {
 		for condition, threshold := range customWindSpeedThresholds {
 			if _, exists := wa.windSpeedThresholds[condition]; exists {
-				fmt.Printf("\033[33m警告: 覆盖默认风速阈值 '%s' (原值: %.1f, 新值: %.1f)\033[0m\n", condition, wa.windSpeedThresholds[condition], threshold)
+				utils.PrintWarnLog(fmt.Sprintf("覆盖默认风速阈值 '%s' (原值: %.1f, 新值: %.1f)", condition, wa.windSpeedThresholds[condition], threshold))
 			} else {
-				fmt.Printf("\033[34m提示: 新增风速阈值 '%s' (值: %.1f)\033[0m\n", condition, threshold)
+				utils.PrintInfoLog(fmt.Sprintf("新增风速阈值 '%s' (值: %.1f)", condition, threshold))
 			}
 			wa.windSpeedThresholds[condition] = threshold
 		}
@@ -226,29 +229,29 @@ func (wa *WeatherAnalyzer) SetCustomWindSpeedThresholds(customWindSpeedThreshold
 // validateWeatherCondition 验证天气条件数据
 func validateWeatherCondition(c WeatherCondition) error {
 	if c.Temperature < -100 || c.Temperature > 100 {
-		return &WeatherError{
-			Code:    ErrInvalidTemperature,
+		return &utils.WeatherError{
+			Code:    utils.ErrInvalidTemperature,
 			Message: fmt.Sprintf("温度数据异常: %.1f°C", c.Temperature),
 		}
 	}
 
 	if c.Humidity < 0 || c.Humidity > 100 {
-		return &WeatherError{
-			Code:    ErrInvalidHumidity,
+		return &utils.WeatherError{
+			Code:    utils.ErrInvalidHumidity,
 			Message: fmt.Sprintf("湿度数据异常: %.1f%%", c.Humidity),
 		}
 	}
 
 	if c.WindSpeed < 0 || c.WindSpeed > 100 {
-		return &WeatherError{
-			Code:    ErrInvalidWindSpeed,
+		return &utils.WeatherError{
+			Code:    utils.ErrInvalidWindSpeed,
 			Message: fmt.Sprintf("风速数据异常: %.1f m/s", c.WindSpeed),
 		}
 	}
 
 	if c.Precipitation < 0 || c.Precipitation > 1000 {
-		return &WeatherError{
-			Code:    ErrInvalidPrecipitation,
+		return &utils.WeatherError{
+			Code:    utils.ErrInvalidPrecipitation,
 			Message: fmt.Sprintf("降水量数据异常: %.1f mm", c.Precipitation),
 		}
 	}
@@ -259,8 +262,8 @@ func validateWeatherCondition(c WeatherCondition) error {
 // Analyze 分析天气状况并返回分析结果
 func (wa *WeatherAnalyzer) Analyze() (*WeatherAnalysisResult, error) {
 	if len(wa.conditions) == 0 {
-		return nil, &WeatherError{
-			Code:    ErrEmptyData,
+		return nil, &utils.WeatherError{
+			Code:    utils.ErrEmptyData,
 			Message: "没有可分析的天气数据",
 		}
 	}
