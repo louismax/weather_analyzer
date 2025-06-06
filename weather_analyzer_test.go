@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/louismax/weather_analyzer/analyzer"
+	"github.com/louismax/weather_analyzer/qweather"
+	"strconv"
 	"testing"
 )
 
@@ -45,6 +47,65 @@ func TestWeatherAnalyzer(t *testing.T) {
 	// 	"晴":    0.1,
 	// 	"多云":   0.2,
 	// }
+
+	// 创建天气分析器
+	//wa, err := analyzer.NewWeatherAnalyzer(conditions, customWeights)
+	wa, err := analyzer.NewWeatherAnalyzer(conditions)
+	if err != nil {
+		t.Fatalf("创建天气分析器失败: %v", err)
+	}
+
+	// 执行分析
+	result, err := wa.Analyze()
+	if err != nil {
+		t.Fatalf("分析天气数据失败: %v", err)
+	}
+
+	// 打印结果
+	t.Logf("天气分析结果:")
+	t.Logf("主导天气状况: %s", result.DominantCondition)
+	t.Logf("平均温度: %.2f°C", result.AverageTemperature)
+	t.Logf("总降水量: %.2f mm", result.TotalPrecipitation)
+	t.Logf("降水持续小时数: %d", result.PrecipitationHours)
+	t.Logf("平均风速: %.2f m/s", result.AverageWindSpeed)
+	t.Logf("最大风速: %.2f m/s", result.MaxWindSpeed)
+	t.Logf("天气描述: %s", result.Description)
+}
+
+func TestQWeatherHistoryAnalyzer(t *testing.T) {
+	client, err := qweather.NewQWeatherApiClient("YOUR_KEY_ID", "YOUR_PROJECT_ID", "YOUR_API_HOST", "./privateKey.pem")
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := client.Request(qweather.APIHistoricalWeather, map[string]string{
+		"location": "101250109",
+		"date":     "20250604",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	res, err := resp.HistoricalWeatherResult()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%+v", res)
+
+	// 创建测试数据
+	conditions := make([]analyzer.WeatherCondition, 0)
+	for _, v := range res.WeatherHourly {
+		f, _ := strconv.ParseFloat(v.Temp, 64)
+		humidity, _ := strconv.ParseFloat(v.Humidity, 64)
+		windSpeed, _ := strconv.ParseFloat(v.WindSpeed, 64)
+		prec_ip, _ := strconv.ParseFloat(v.Precip, 64)
+		conditions = append(conditions, analyzer.WeatherCondition{
+			Time:          v.Time,
+			Temperature:   f,
+			Condition:     v.Text,
+			Humidity:      humidity,
+			WindSpeed:     windSpeed,
+			Precipitation: prec_ip,
+		})
+	}
 
 	// 创建天气分析器
 	//wa, err := analyzer.NewWeatherAnalyzer(conditions, customWeights)

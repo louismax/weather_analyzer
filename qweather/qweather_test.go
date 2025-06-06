@@ -45,5 +45,9 @@ func TestQWeatherApiClientRequest(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("%s", string(resp))
+	res, err := resp.GeoCityLookupResult()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%+v", res)
 }

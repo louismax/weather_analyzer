@@ -124,7 +124,7 @@ func initQWeatherApiClient(kId, subId, apiHost string, PrivateKey ed25519.Privat
 	return &cli, nil
 }
 
-func (c *ApiClient) Request(methodPath string, params map[string]string) ([]byte, error) {
+func (c *ApiClient) Request(methodPath string, params map[string]string) (*ResultQWeather, error) {
 	_url := fmt.Sprintf("https://%s%s", c.ApiHost, methodPath)
 	if len(params) > 0 {
 		_url += "?"
@@ -162,7 +162,7 @@ func (c *ApiClient) Request(methodPath string, params map[string]string) ([]byte
 	defer func() {
 		_ = response.Body.Close()
 	}()
-	respX, err := io.ReadAll(response.Body)
+	resp, err := io.ReadAll(response.Body)
 	if err != nil {
 		utils.PrintErrorLog("请求结果解析失败,error:%+v", err)
 		return nil, &utils.WeatherError{
@@ -170,7 +170,9 @@ func (c *ApiClient) Request(methodPath string, params map[string]string) ([]byte
 			Message: fmt.Sprintf("请求结果解析失败,error:%+v", err),
 		}
 	}
-	return respX, nil
+	return &ResultQWeather{
+		Body: resp,
+	}, nil
 }
 
 // sign 签名
