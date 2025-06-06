@@ -49,7 +49,6 @@ func TestWeatherAnalyzer(t *testing.T) {
 	// }
 
 	// 创建天气分析器
-	//wa, err := analyzer.NewWeatherAnalyzer(conditions, customWeights)
 	wa, err := analyzer.NewWeatherAnalyzer(conditions)
 	if err != nil {
 		t.Fatalf("创建天气分析器失败: %v", err)
@@ -108,7 +107,6 @@ func TestQWeatherHistoryAnalyzer(t *testing.T) {
 	}
 
 	// 创建天气分析器
-	//wa, err := analyzer.NewWeatherAnalyzer(conditions, customWeights)
 	wa, err := analyzer.NewWeatherAnalyzer(conditions)
 	if err != nil {
 		t.Fatalf("创建天气分析器失败: %v", err)

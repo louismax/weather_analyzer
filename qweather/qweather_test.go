@@ -51,3 +51,8 @@ func TestQWeatherApiClientRequest(t *testing.T) {
 	}
 	t.Logf("%+v", res)
 }
+
+func TestWeatherIconCode(t *testing.T) {
+	c := ApiClient{}
+	t.Log(c.GetWeatherIconCode()["晴"])
+}

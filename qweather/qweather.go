@@ -34,7 +34,6 @@ func NewQWeatherApiClient(kId, subId, apiHost, PrivateKeyPath string) (*ApiClien
 	//读取私钥文件
 	privateKeyPEM, err := os.ReadFile(PrivateKeyPath)
 	if err != nil {
-		utils.PrintErrorLog(err.Error())
 		return nil, &utils.WeatherError{
 			Code:    utils.ErrReadFile,
 			Message: fmt.Sprintf("读取私钥文件失败.%s", err.Error()),
@@ -51,7 +50,6 @@ func NewQWeatherApiClient(kId, subId, apiHost, PrivateKeyPath string) (*ApiClien
 	//PKCS#8解析
 	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		utils.PrintErrorLog(err.Error())
 		return nil, &utils.WeatherError{
 			Code:    utils.ErrInvalidInput,
 			Message: fmt.Sprintf("PKCS#8解析失败.%s", err.Error()),
@@ -80,7 +78,6 @@ func NewQWeatherApiClientByPKString(kId, subId, apiHost, PrivateKey string) (*Ap
 	//PKCS#8解析
 	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		utils.PrintErrorLog(err.Error())
 		return nil, &utils.WeatherError{
 			Code:    utils.ErrInvalidInput,
 			Message: fmt.Sprintf("PKCS#8解析失败.%s", err.Error()),
@@ -187,4 +184,73 @@ func (c *ApiClient) sign() {
 	SignatureBase64URL := base64.URLEncoding.EncodeToString(sig)
 
 	c.Token = fmt.Sprintf("Bearer %s.%s.%s", HeaderBase64URL, PayloadBase64URL, SignatureBase64URL)
+}
+
+func (c *ApiClient) GetWeatherIconCode() map[string]string {
+	return map[string]string{
+		"晴":        "100",
+		"多云":       "101",
+		"少云":       "102",
+		"晴间多云":     "103",
+		"阴":        "104",
+		"雷阵雨":      "302",
+		"强雷阵雨":     "303",
+		"雷阵雨伴有冰雹":  "304",
+		"小雨":       "305",
+		"中雨":       "306",
+		"大雨":       "307",
+		"极端降雨":     "308",
+		"毛毛雨/细雨":   "309",
+		"暴雨":       "310",
+		"大暴雨":      "311",
+		"特大暴雨":     "312",
+		"冻雨":       "313",
+		"小到中雨":     "314",
+		"中到大雨":     "315",
+		"大到暴雨":     "316",
+		"暴雨到大暴雨":   "317",
+		"大暴雨到特大暴雨": "318",
+		"阵雨":       "350",
+		"强阵雨":      "351",
+		"雨":        "399",
+		"小雪":       "400",
+		"中雪":       "401",
+		"大雪":       "402",
+		"暴雪":       "403",
+		"雨夹雪":      "404",
+		"雨雪天气":     "405",
+		"小到中雪":     "408",
+		"中到大雪":     "409",
+		"大到暴雪":     "410",
+		"阵雨夹雪":     "456",
+		"阵雪":       "457",
+		"雪":        "499",
+		"薄雾":       "500",
+		"雾":        "501",
+		"霾":        "502",
+		"扬沙":       "503",
+		"浮尘":       "504",
+		"沙尘暴":      "507",
+		"强沙尘暴":     "508",
+		"浓雾":       "509",
+		"强浓雾":      "510",
+		"中度霾":      "511",
+		"重度霾":      "512",
+		"严重霾":      "513",
+		"大雾":       "514",
+		"特强浓雾":     "515",
+		"热":        "900",
+		"冷":        "901",
+		"未知":       "999",
+
+		//和风天气夜间天气ICON
+		//"晴":"150",
+		//"多云":"151",
+		//"少云":"152",
+		//"晴间多云":"153",
+		//"阵雨":"300",
+		//"强阵雨":"301",
+		//"阵雨夹雪":"406",
+		//"阵雪":"407",
+	}
 }
