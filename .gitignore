@@ -30,3 +30,6 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+.idea/
+dev-ed25519-private.pem
+local_test.go
